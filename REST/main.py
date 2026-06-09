@@ -1,8 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 from data import read_dataframe
-import uuid
-import shutil
 
 
 app = FastAPI()
