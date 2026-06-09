@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 from data import read_dataframe
+import uuid
+import shutil
 
 
 app = FastAPI()
@@ -10,8 +12,7 @@ async def uploadData(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
     
     try:
-        df = pd.read_csv(file.file)
-        result = read_dataframe(df)
+        result = read_dataframe(file.file)
         return{
             "filename": file.filename,
             "data": result
@@ -24,7 +25,7 @@ async def uploadData(file: UploadFile = File(...)):
         )
 
 @app.get("/data/stats")
-async def  get_stats(dataset: str):
+async def  getStats(dataset: str):
     filepath = f"uploads/{dataset}.csv"
     try:
         df = pd.read_csv(filepath)
@@ -40,3 +41,8 @@ async def  get_stats(dataset: str):
             detail="Dataset could not be found, try uploading one before running this command"
         )
     
+@app.get("/health")
+async def healthCheck():
+    return {
+        "status": "Running"
+    }
