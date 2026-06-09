@@ -22,3 +22,21 @@ async def uploadData(file: UploadFile = File(...)):
             status_code=500,
             detail=str(e)
         )
+
+@app.get("/data/stats")
+async def  get_stats(dataset: str):
+    filepath = f"uploads/{dataset}.csv"
+    try:
+        df = pd.read_csv(filepath)
+        stats = df.describe(include="all").fillna("").to_dict()
+        return {
+            "dataset": dataset,
+            "stats": stats
+        }
+    
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset could not be found, try uploading one before running this command"
+        )
+    
