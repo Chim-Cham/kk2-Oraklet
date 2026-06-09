@@ -4,7 +4,7 @@ from data import read_dataframe
 
 
 app = FastAPI()
-@app.post("/upload")
+@app.post("/data/upload")
 async def uploadData(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
