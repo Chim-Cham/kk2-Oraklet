@@ -1,0 +1,9 @@
+fastapi
+pandas
+pydantic
+pytest
+python-multipart
+uvicorn
+uv
+transformers 
+torch 
