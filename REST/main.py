@@ -1,16 +1,22 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
-from data import read_dataframe
+from io import BytesIO
+""" from data import read_dataframe """
 
+upLoadedFile = None
+fileName = None
 
 app = FastAPI()
 @app.post("/data/upload")
 async def uploadData(file: UploadFile = File(...)):
+    global upLoadedFile, fileName
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
     
     try:
-        result = read_dataframe(file.file)
+        result = await file.read()
+        upLoadedFile = BytesIO(result)
+        fileName = file.filename
         return{
             "filename": file.filename,
             "data": result
@@ -23,13 +29,13 @@ async def uploadData(file: UploadFile = File(...)):
         )
 
 @app.get("/data/stats")
-async def  getStats(dataset: str):
-    filepath = f"uploads/{dataset}.csv"
+async def  getStats():
+    global upLoadedFile, fileName
     try:
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(upLoadedFile)
         stats = df.describe(include="all").fillna("").to_dict()
         return {
-            "dataset": dataset,
+            "dataset": fileName,
             "stats": stats
         }
     
