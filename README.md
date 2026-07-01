@@ -11,7 +11,7 @@ pip install -r requirements.txt
 
 How to Run:
 ```bash
-uv run uvicorn main:app --reload
+uv run uvicorn app.main:app --reload
 ```
 
 Then open 'http://127.0.0.1:8000/docs'
