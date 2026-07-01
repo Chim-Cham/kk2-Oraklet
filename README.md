@@ -4,15 +4,13 @@ LLM-chain with FastAPI and SmolLLM
 
 How to install:
 ```bash
-
 python -m venv .venv
-source .venv\Scripts\activate        # mac: .venv/bin/activate 
+source .venv/Scripts/activate        # mac: .venv/bin/activate 
 pip install -r requirements.txt
 ```
 
 How to Run:
 ```bash
-uv sync
 uv run uvicorn main:app --reload
 ```
 
