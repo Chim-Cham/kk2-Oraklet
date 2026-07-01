@@ -1,80 +1,52 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
-from io import BytesIO
+from .data import upload_file, get_dataframe, get_filename, data_stats, data_stats_text
 from .config import settings
 from .chains import chain
 
 app = FastAPI()
 
-upLoadedFile = None
-fileName = None
-
-app = FastAPI()
 @app.post("/data/upload")
-async def uploadData(file: UploadFile = File(...)):
-    global upLoadedFile, fileName
+async def upload_Data(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
     
-    try:
-        result = await file.read()
-        upLoadedFile = BytesIO(result)
-        fileName = file.filename
-        return{
-            "filename": fileName,
-            "data": upLoadedFile
-        }
-    
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+    upload_file(
+        file.filename,
+        await file.read()
+    )
 
-@app.get("/data/stats")
-async def  getStats():
-    global upLoadedFile, fileName
-    try:
-        df = pd.read_csv(upLoadedFile)
-        stats = df.describe(include="all").fillna("").to_dict()
-        return {
-            "dataset": fileName,
-            "stats": stats
-        }
-    
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="Dataset could not be found, try uploading one before running this command"
-        )
-    
-@app.get("/health")
-async def healthCheck():
     return {
-        "status": "Running"
+        "filename": get_filename()
     }
 
+
+@app.get("/data/stats")
+async def get_Stats():
+    return {
+        "dataset": get_filename(),
+        "stats": data_stats()
+    }
+
+
+@app.get("/health")
+async def health_Check():
+    return {"status": "Running"}
+
+
 @app.get("/URL_info")
-async def getURL():
+async def get_URL():
     return {
         settings.url,
         settings.api_key
     }
     
+
 @app.post("/ai/ask")
-async def askAI():
-    try:
-        df = pd.read_csv(upLoadedFile)
-        stats = df.describe(include="all").to_string()
-        answer = chain.invoke({
-            "stats": stats
-        })
-        return answer
-    
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=404,
-            detail="Dataset could not be found, try uploading one before running this command"
-        )
-        
+async def ask_AI():
+    answer = chain.invoke({"stats": data_stats_text()})
+
+    return {
+        "answer": answer
+    }
     

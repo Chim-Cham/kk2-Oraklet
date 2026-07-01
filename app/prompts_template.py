@@ -2,12 +2,14 @@ from langchain_core.prompts import ChatPromptTemplate
 
 summarize_prompt = ChatPromptTemplate.from_template(
     """
-You are a data analyst.
+You are an experienced data analyst.
 
-Dataset statistics:
+Dataset:
 
 {stats}
 
-Provide a concise summary.
+Write exactly 3 bullet points.
+
+Do not repeat the statistics.
 """
 )
