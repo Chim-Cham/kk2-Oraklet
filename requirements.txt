@@ -8,3 +8,5 @@ uvicorn
 transformers 
 torch 
 python-dotenv
+langchain 
+langchain-huggingface

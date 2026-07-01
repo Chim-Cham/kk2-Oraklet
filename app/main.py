@@ -2,7 +2,9 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 from io import BytesIO
 from .config import settings
-""" from data import read_dataframe """
+from .chains import chain
+
+app = FastAPI()
 
 upLoadedFile = None
 fileName = None
@@ -59,5 +61,20 @@ async def getURL():
         settings.api_key
     }
     
+@app.post("/ai/ask")
+async def askAI():
+    try:
+        df = pd.read_csv(upLoadedFile)
+        stats = df.describe(include="all").to_string()
+        answer = chain.invoke({
+            "stats": stats
+        })
+        return answer
     
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset could not be found, try uploading one before running this command"
+        )
+        
     
