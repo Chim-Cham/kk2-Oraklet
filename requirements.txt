@@ -3,7 +3,7 @@ pandas
 pydantic
 pytest
 python-multipart
-uvicorn
 uv
+uvicorn
 transformers 
 torch 
