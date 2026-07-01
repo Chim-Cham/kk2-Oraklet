@@ -7,3 +7,4 @@ uv
 uvicorn
 transformers 
 torch 
+python-dotenv

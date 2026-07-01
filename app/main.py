@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 from io import BytesIO
+from .config import settings
 """ from data import read_dataframe """
 
 upLoadedFile = None
@@ -18,8 +19,8 @@ async def uploadData(file: UploadFile = File(...)):
         upLoadedFile = BytesIO(result)
         fileName = file.filename
         return{
-            "filename": file.filename,
-            "data": result
+            "filename": fileName,
+            "data": upLoadedFile
         }
     
     except Exception as e:
@@ -50,3 +51,13 @@ async def healthCheck():
     return {
         "status": "Running"
     }
+
+@app.get("/URL_info")
+async def getURL():
+    return {
+        settings.url,
+        settings.api_key
+    }
+    
+    
+    
