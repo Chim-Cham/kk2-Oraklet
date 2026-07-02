@@ -33,14 +33,6 @@ async def get_Stats():
 @app.get("/health")
 async def health_Check():
     return {"status": "Running"}
-
-
-@app.get("/URL_info")
-async def get_URL():
-    return {
-        settings.url,
-        settings.api_key
-    }
     
 
 @app.post("/ai/ask")
