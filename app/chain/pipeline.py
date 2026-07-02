@@ -1,5 +1,4 @@
-from .steps import PromptBuilder
-from .steps import LLMRunner
-from .steps import ResponeParser
+from .steps import PromptBuilder, LLMRunner, ResponeParser
+
 
 chain = ( PromptBuilder() | LLMRunner() | ResponeParser() )

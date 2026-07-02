@@ -1,6 +1,7 @@
 from transformers import pipeline
 from .runnable import Runnable
 from app.schemas import DatasetQuestion
+from app.data import dataset_context
 
 pipe = pipeline(
     "text-generation",
@@ -9,9 +10,11 @@ pipe = pipeline(
     temperature=0,
 )
 
+
 class PromptBuilder(Runnable[DatasetQuestion, str]):
     def invoke(self, data: DatasetQuestion) -> str:
-        dataset = data.df.head(20).to_string(index=False)
+        
+        context = dataset_context(data.df)
 
         return f"""
             You are a helpful data analyst.
@@ -24,8 +27,10 @@ class PromptBuilder(Runnable[DatasetQuestion, str]):
             - Do not repeat the dataset.
             - Respond with a single short answer.
 
-            Dataset:
-            {dataset}
+            If the answer cannot be determined from the information provided,
+            say "I don't know based on the available data."
+
+            {context}
 
             Question:
             {data.question}
@@ -45,10 +50,12 @@ class LLMRunner(Runnable[str, dict]):
 
         result = pipe(
             prompt,
-            max_new_tokens=20,
+            max_new_tokens=50,
             do_sample=False,
             return_full_text=False
         )
+
+        print(result)
 
         return {
             "prompt": prompt,
@@ -69,7 +76,7 @@ class ResponeParser(Runnable[str, dict]):
         )
 
         return {
-            "question": question,
-            "answer": answer,
-            "model": data["model"]
+            "Question": question,
+            "Answer": answer,
+            "Model": data["model"]
         }

@@ -36,3 +36,20 @@ def data_stats_text():
         "Columns": list(df.columns),
         "Numeric": df.describe().round(2).to_dict(),
     }
+
+def dataset_context(df):
+    return f"""
+    Dataset Information
+
+    Rows: {len(df)}
+    Columns: {len(df.columns)}
+
+    Column names:
+    {", ".join(df.columns)}
+
+    Data types:
+    {df.dtypes.to_string()}
+    
+    Sample rows:
+    {df.head(5).to_string(index=False)}
+    """
