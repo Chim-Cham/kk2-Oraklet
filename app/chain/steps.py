@@ -37,17 +37,11 @@ class PromptBuilder(Runnable[DatasetQuestion, str]):
 
             If the answer cannot be determined from the information provided,
             say "I don't know based on the available data."
-            
-            --------------------
 
             {context}
-            
-            --------------------
 
-            User Question:
+            Question:
             {data.question}
-
-            --------------------
 
             Answer:
             """

@@ -1,6 +1,7 @@
 import pandas as pd
 from app.chain.steps import PromptBuilder, LLMRunner, ResponeParser
 from app.schemas import DatasetQuestion
+from app.chain.pipeline import chain
 from unittest.mock import patch
 
 def test_prompt_builder():
@@ -52,3 +53,36 @@ def test_response_parser():
     assert result["Question"] == "Who?"
     assert result["Answer"] == "Thomas"
     assert result["Model"] == "MockLLM"
+
+def test_chain_run():
+    df = pd.DataFrame({
+        "name": ["Alice", "Bob", "Carol"],
+        "grade": [85, 91, 97]
+    })
+
+    data = DatasetQuestion(
+        df=df,
+        question="Who has the highest grade?"
+    )
+
+    result = chain.invoke(data)
+    assert isinstance(result, dict)
+    assert "Question" in result
+    assert "Answer" in result
+    assert "Model" in result
+
+def test_unBias():
+    df = pd.DataFrame({
+        "name": ["Alice", "Bob", "Carol"],
+        "grade": [85, 91, 97]
+    })
+
+    data = DatasetQuestion(
+        df=df,
+        question="Who has the highest grade?"
+    )
+
+    result = chain.invoke(data)
+    print(result["Answer"])
+    assert "Carol" in result["Answer"]
+    

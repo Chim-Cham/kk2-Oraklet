@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
+from io import BytesIO
 from .data import upload_file, get_dataframe, get_filename, data_stats, data_stats_text
 from .config import settings
 from .chain.pipeline import chain
@@ -11,8 +12,9 @@ app = FastAPI()
 async def upload_Data(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
+    contents = await file.read()    
     try:
-        pd.read_csv(file)
+        pd.read_csv(BytesIO(contents))
     except Exception:
         raise HTTPException(
             status_code=400,
@@ -20,7 +22,6 @@ async def upload_Data(file: UploadFile = File(...)):
         )
     
     MAX_SIZE = 1024 * 1024 # 1 MB
-    contents = await file.read()
     if len(contents) > MAX_SIZE:
         raise HTTPException(
             status_code=413,
@@ -30,7 +31,7 @@ async def upload_Data(file: UploadFile = File(...)):
     
     upload_file(
         file.filename,
-        await file.read()
+        contents
     )
 
     return {

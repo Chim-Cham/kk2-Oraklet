@@ -46,10 +46,7 @@ def dataset_context(df):
 
     Column names:
     {", ".join(df.columns)}
-
-    Data types:
-    {df.dtypes.to_string()}
     
-    Sample rows:
-    {df.head(5).to_string(index=False)}
+    Data:
+    {df.to_string(index=False)}
     """
