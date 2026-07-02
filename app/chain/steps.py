@@ -1,35 +1,45 @@
 from transformers import pipeline
-from langchain_huggingface import HuggingFacePipeline
-from langchain_core.runnables import RunnableLambda
-from langchain_core.output_parsers import StrOutputParser
-
-class PromptBuilder:
-
-    def build_prompt(data):
-        df = data["df"]
-        question = data["question"]
-
-        return """
-            You are an assistant answering questions about a dataset.
-
-            Dataset:
-
-            {dataset_text}
-
-            Question:
-            {question}
-
-            Answer:
-            """
-    PromptBuilder = RunnableLambda(build_prompt)
-
+from .runnable import Runnable
 
 pipe = pipeline(
     "text-generation",
     model="HuggingFaceTB/SmolLM2-135M-Instruct",
 )
 
-LLMRunner = HuggingFacePipeline(pipeline=pipe)
+class PromptBuilder(Runnable[dict, str]):
+    def invoke(self, data: dict):
+        dataset = data["df"].to_string(index=False)
+
+        return f"""
+            Dataset:
+
+            {dataset}
+
+            Question:
+            {data["question"]}
+
+            Answer:
+            """
 
 
-ResponeParser = StrOutputParser()
+
+
+class LLMRunner(Runnable[str, str]):
+    def invoke(self, prompt: str):
+
+        result = pipe(
+            prompt,
+            max_new_tokens=200,
+            do_sample=False
+        )
+
+        return result[0]["generated_text"]
+
+
+
+class ResponeParser(Runnable[str, dict]):
+    def invoke(self, text: str):
+        
+        return {
+            "answer": text
+        }
