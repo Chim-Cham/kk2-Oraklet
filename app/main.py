@@ -44,13 +44,11 @@ async def get_URL():
     
 
 @app.post("/ai/ask")
-async def ask_AI():
-    def ask(question: QuestionRequest):
+async def ask_AI(question: QuestionRequest):
+    data = DatasetQuestion(
+        df=get_dataframe(),
+        question=question.question
+    )
 
-        data = DatasetQuestion(
-            df=get_dataframe(),
-            question=question.question
-        )
-
-        return chain.invoke(data)
+    return chain.invoke(data)
     
