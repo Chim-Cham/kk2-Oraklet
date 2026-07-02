@@ -15,21 +15,21 @@ class Runnable(BaseModel, Generic[I, O]):
     
     def __or__(self, other: Any):
         if isinstance(other, Runnable):
-            return RunnableSequence(
+            return RunnableSequence.model_construct(
                 first=self,
                 second=other
             )
         
         if callable(other):
-            return RunnableSequence(
+            return RunnableSequence.model_construct(
                 first=self,
-                second=RunnableLabda(func=other)
+                second=RunnableLambda.model_construct(func=other)
             )
         
         return NotImplemented
     
 
-class RunnableLabda(Runnable[I, O]):
+class RunnableLambda(Runnable[I, O]):
     func: Callable[[I], O]
 
     def invoke(self, data: I) -> O:
