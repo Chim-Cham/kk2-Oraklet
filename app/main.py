@@ -11,6 +11,22 @@ app = FastAPI()
 async def upload_Data(file: UploadFile = File(...)):
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only CSV allowed")
+    try:
+        pd.read_csv(file)
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid CSV file."
+        )
+    
+    MAX_SIZE = 1024 * 1024 # 1 MB
+    contents = await file.read()
+    if len(contents) > MAX_SIZE:
+        raise HTTPException(
+            status_code=413,
+            detail="File too large"
+        )
+    
     
     upload_file(
         file.filename,
