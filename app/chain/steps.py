@@ -5,23 +5,26 @@ from app.schemas import DatasetQuestion
 pipe = pipeline(
     "text-generation",
     model="HuggingFaceTB/SmolLM2-135M-Instruct",
+    max_new_tokens=300,
+    temperature=0,
 )
 
 class PromptBuilder(Runnable[DatasetQuestion, str]):
     def invoke(self, data: DatasetQuestion) -> str:
-        dataset = data.df.head(10).to_string(index=False)
+        dataset = data.df.head(20).to_string(index=False)
 
         return f"""
             You are a helpful data analyst.
 
-            The table below contains data.
+            Use ONLY the information in the dataset.
 
-            Answer ONLY the user's question.
-            Do not repeat the dataset.
-            Be concise.
+            Rules:
+            - Answer the user's question.
+            - Do not ask another question.
+            - Do not repeat the dataset.
+            - Respond with a single short answer.
 
             Dataset:
-
             {dataset}
 
             Question:
@@ -42,8 +45,9 @@ class LLMRunner(Runnable[str, dict]):
 
         result = pipe(
             prompt,
-            max_new_tokens=200,
-            do_sample=False
+            max_new_tokens=20,
+            do_sample=False,
+            return_full_text=False
         )
 
         return {
@@ -56,17 +60,13 @@ class LLMRunner(Runnable[str, dict]):
 class ResponeParser(Runnable[str, dict]):
     def invoke(self, data: dict):
 
-        answer = data["response"]
+        answer = data["response"].strip()
         
-        if "Answer:" in answer:
-            answer = answer.split("Answer:")[-1].strip()
+        answer = answer.split("\n")[0].strip()
         
-        question = ""
-
-        if "Question:" in data["prompt"]:
-            question = (
-                data["prompt"].split("Question:")[-1].split("Answer:")[0].strip()
-            )
+        question = (
+            data["prompt"].split("Question:")[-1].split("Answer:")[0].strip()
+        )
 
         return {
             "question": question,
