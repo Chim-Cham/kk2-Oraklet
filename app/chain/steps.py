@@ -33,19 +33,6 @@ class ContextBuilder(Runnable[DatasetQuestion, DatasetContext]):
         # Default response incase the given prompt can't be resolved.
         context = "Could not form a proper answer."       
         
-        if "youngest" in question:
-            return DatasetContext(
-                    context=f"Youngest person: {min_number(df["Age"])}",
-                    question=data.question
-                )        
-        if "oldest" in question:
-            return DatasetContext(
-                    context=f"Oldest person: {max_number(df["Age"])}",
-                    question=data.question
-                )
-
-
-
         for keyword, operation in OPERATIONS.items():
             
             if keyword not in question:

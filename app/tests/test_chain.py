@@ -27,14 +27,15 @@ def test_prompt_builder():
 
     data = DatasetQuestion(
         df=df,
-        question="Who is the oldest?"
+        question="Who has the highest age?"
     )
 
     context = ContextBuilder().invoke(data)
     prompt= PromptBuilder().invoke(context)
 
+    assert "Kajsa" in prompt
     assert "35" in prompt
-    assert "Who is the oldest" in prompt
+    assert "Who has the highest age?" in prompt
 
 @patch("app.chain.steps.pipe")
 def test_llm_runner(mock_pipe):
