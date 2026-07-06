@@ -42,11 +42,31 @@ def dataset_context(df):
     Dataset Information
 
     Rows: {len(df)}
-    Columns: {len(df.columns)}
 
-    Column names:
+    Columns:
     {", ".join(df.columns)}
     
-    Data:
-    {df.to_string(index=False)}
+    Datset:
+    {df.describe(include="all").fillna("").to_dict()}
     """
+
+def max_row(df):
+    result = []
+    for col in df.select_dtypes(include="number").columns:
+        value = df[col].max()
+        result.append(f"{col}: {value}")
+    return "\n".join(result)
+
+def min_row(df):
+    result = []
+    for col in df.select_dtypes(include="number").columns:
+        value = df[col].min()
+        result.append(f"{col}: {value}")
+    return "\n".join(result)
+
+def average_row(df):
+    result = []
+    for col in df.select_dtypes(include="number").columns:
+        value = df[col].mean()
+        result.append(f"{col}: {value}")
+    return "\n".join(result)
