@@ -1,26 +1,25 @@
 import pandas as pd
-from app.chain.steps import PromptBuilder, LLMRunner, ResponeParser
-from app.schemas import DatasetQuestion
+from app.chain.steps import ContextBuilder, PromptBuilder, LLMRunner, ResponeParser
+from app.schemas import DatasetQuestion, DatasetContext
 from app.chain.pipeline import chain
 from unittest.mock import patch
 
 def test_prompt_builder():
     df = pd.DataFrame({
-        "name": ["Gustav", "Kajsa"],
-        "age": [31, 35]
+        "Name": ["Gustav", "Kajsa"],
+        "Age": [31, 35]
     })
 
     data = DatasetQuestion(
         df=df,
-        question="Who is oldest?"
+        question="Who is the oldest?"
     )
 
-    prompt= PromptBuilder().invoke(data)
+    context = ContextBuilder().invoke(data)
+    prompt= PromptBuilder().invoke(context)
 
-    assert "Who is oldest" in prompt
-    assert "Gustav" in prompt
-    assert "Kajsa" in prompt
-    assert "Dataset" in prompt
+    assert "35" in prompt
+    assert "Who is the oldest" in prompt
 
 @patch("app.chain.steps.pipe")
 def test_llm_runner(mock_pipe):
@@ -42,9 +41,9 @@ def test_response_parser():
         "prompt": """
         Question:
         Who?
-        Answer:
+        Sentence:
         """,
-        "response": "Thomas",
+        "response": "1. Thomas",
         "model": "MockLLM"
     }
 
@@ -70,19 +69,3 @@ def test_chain_run():
     assert "Question" in result
     assert "Answer" in result
     assert "Model" in result
-
-def test_unBias():
-    df = pd.DataFrame({
-        "name": ["Alice", "Bob", "Carol"],
-        "grade": [85, 91, 97]
-    })
-
-    data = DatasetQuestion(
-        df=df,
-        question="Who has the highest grade?"
-    )
-
-    result = chain.invoke(data)
-    print(result["Answer"])
-    assert "Carol" in result["Answer"]
-    

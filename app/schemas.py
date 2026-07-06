@@ -15,3 +15,7 @@ class DatasetQuestion(BaseModel):
     }
 
     question: str
+
+class DatasetContext(BaseModel):
+    context: str
+    question: str

@@ -1,10 +1,10 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import pandas as pd
 from io import BytesIO
-from .data import upload_file, get_dataframe, get_filename, data_stats, data_stats_text
+from .data import upload_file, get_dataframe, get_filename, data_stats
 from .config import settings
 from .chain.pipeline import chain
-from .schemas import QuestionRequest, QuestionResponse, DatasetQuestion
+from .schemas import QuestionRequest, DatasetQuestion
 
 app = FastAPI()
 

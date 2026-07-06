@@ -1,4 +1,4 @@
-from .steps import PromptBuilder, LLMRunner, ResponeParser
+from .steps import ContextBuilder, PromptBuilder, LLMRunner, ResponeParser
 
 
-chain = ( PromptBuilder() | LLMRunner() | ResponeParser() )
+chain = ( ContextBuilder() | PromptBuilder() | LLMRunner() | ResponeParser() )

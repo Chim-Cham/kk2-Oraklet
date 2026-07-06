@@ -5,6 +5,7 @@ from fastapi import HTTPException
 _upLoadedFile = None
 _fileName = None
 
+# API Functions
 def upload_file(filename: str, data: bytes):
     global _upLoadedFile, _fileName
 
@@ -37,36 +38,29 @@ def data_stats_text():
         "Numeric": df.describe().round(2).to_dict(),
     }
 
-def dataset_context(df):
-    return f"""
-    Dataset Information
+# Pandas for data management
+def max_row(df, column):
+    return df.loc[df[column].idxmax()]
 
-    Rows: {len(df)}
+def min_row(df, column):
+    return df.loc[df[column].idxmin()]
 
-    Columns:
-    {", ".join(df.columns)}
-    
-    Datset:
-    {df.describe(include="all").fillna("").to_dict()}
-    """
+def count_rows(df):
+    result = len(df)
+    return result
 
-def max_row(df):
-    result = []
-    for col in df.select_dtypes(include="number").columns:
-        value = df[col].max()
-        result.append(f"{col}: {value}")
-    return "\n".join(result)
+def count_columns(df):
+    result = len(df.columns)
+    return result
 
-def min_row(df):
-    result = []
-    for col in df.select_dtypes(include="number").columns:
-        value = df[col].min()
-        result.append(f"{col}: {value}")
-    return "\n".join(result)
+def max_number(df):
+    result = df.max()
+    return result
 
-def average_row(df):
-    result = []
-    for col in df.select_dtypes(include="number").columns:
-        value = df[col].mean()
-        result.append(f"{col}: {value}")
-    return "\n".join(result)
+def min_number(df):
+    result = df.min()
+    return result
+
+def average_number(df):
+    result = df.mean()
+    return result

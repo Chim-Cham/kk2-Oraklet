@@ -1,7 +1,7 @@
 from transformers import pipeline
 from .runnable import Runnable
-from app.schemas import DatasetQuestion
-from app.data import dataset_context, max_row, min_row, average_row
+from app.schemas import DatasetQuestion, DatasetContext
+from app.data import max_number, min_number, average_number, count_rows, count_columns
 
 pipe = pipeline(
     "text-generation",
@@ -10,37 +10,95 @@ pipe = pipeline(
     temperature=0,
 )
 
+OPERATIONS = {
+    "highest": "max",
+    "oldest": "max",
+    "maximum": "max",
+    "lowest": "min",
+    "youngest": "min",
+    "minimum": "min",
+    "average": "average",
+    "row" : "rows",
+    "rows" : "rows",
+    "column" : "columns",
+    "columns" : "columns"
+}
 
-class PromptBuilder(Runnable[DatasetQuestion, str]):
-    def invoke(self, data: DatasetQuestion) -> str:
+class ContextBuilder(Runnable[DatasetQuestion, DatasetContext]):
+
+    def invoke(self, data: DatasetQuestion) -> DatasetContext:
+        df = data.df
+        question = data.question.lower()
+
+        # Default response incase the given prompt can't be resolved.
+        context = "Could not form a proper answer."       
         
-        context = dataset_context(data.df)
+        if "youngest" in question:
+            return DatasetContext(
+                    context=f"Youngest person: {min_number(df["Age"])}",
+                    question=data.question
+                )        
+        if "oldest" in question:
+            return DatasetContext(
+                    context=f"Oldest person: {max_number(df["Age"])}",
+                    question=data.question
+                )
 
+
+
+        for keyword, operation in OPERATIONS.items():
+            
+            if keyword not in question:
+                continue
+            elif operation == "rows":
+                return DatasetContext(
+                    context=f"Number of Rows: {count_rows(df)}",
+                    question=data.question
+                )
+            elif operation == "columns":
+                return DatasetContext(
+                    context=f"Number of Columns: {count_columns(df)}",
+                    question=data.question
+                )
+
+            for col in df.select_dtypes(include="number").columns:
+                
+                column = df[col]
+                
+                if col.lower() in question:
+                    if operation == "max":
+                        value = max_number(column)
+                    elif operation == "min":
+                        value = min_number(column)
+                    elif operation == "average":
+                        value = average_number(column)
+                    
+                    context = f"{keyword.title()} {col}: {value}"
+
+                    break
+                    
+
+        return DatasetContext(
+            context=context,
+            question=data.question
+        )
+
+
+class PromptBuilder(Runnable[DatasetContext, str]):
+    def invoke(self, data: DatasetContext):
+        
         return f"""
-            You are a data analyst answering questions from a user.
+            Rewrite this fact as one short sentence trying to answer the question.
 
-            Rules:
-            - Answer the user's question.
-            - Do not ask another question.
-            - Do not repeat the dataset.
-            - Respond with a single short answer.
-            - Use ONLY the information in the dataset.
+            Do not take information from anywhere outside of this prompt.
 
-            {context}
-
-            Highest value for each column:
-            {max_row}
-
-            Lowest value for each column:
-            {min_row}
-
-            Average value for each column:
-            {average_row}
+            Information:
+            {data.context}
 
             Question:
             {data.question}
 
-            Answer:
+            Sentence:
             """
 
 
@@ -53,12 +111,13 @@ class LLMRunner(Runnable[str, dict]):
 
         result = pipe(
             prompt,
-            max_new_tokens=200,
+            max_new_tokens=50,
             do_sample=False,
             return_full_text=False
         )
 
-        print(result)
+        print(prompt)
+        print(result[0]["generated_text"])
 
         return {
             "prompt": prompt,
@@ -70,14 +129,13 @@ class LLMRunner(Runnable[str, dict]):
 class ResponeParser(Runnable[str, dict]):
     def invoke(self, data: dict):
 
-        print(data["response"])
-
         answer = data["response"].strip()
 
         answer = answer.split("\n")[0].strip()
+        answer = answer.split(" ")
         
         question = (
-            data["prompt"].split("Question:")[-1].split("Answer:")[0].strip()
+            data["prompt"].split("Question:")[-1].split("Sentence:")[0].strip()
         )
 
         return {
