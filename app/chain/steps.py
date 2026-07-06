@@ -81,8 +81,6 @@ class ContextBuilder(Runnable[DatasetQuestion, DatasetContext]):
                         value = average_number(df[col])
                         context = f"{keyword.title()} {df[col]}: {value}"
 
-                    
-                    print(context)
                     break
                     
 
@@ -123,9 +121,6 @@ class LLMRunner(Runnable[str, dict]):
             do_sample=False,
             return_full_text=False
         )
-
-        print(prompt)
-        print(result[0]["generated_text"])
 
         return {
             "prompt": prompt,
