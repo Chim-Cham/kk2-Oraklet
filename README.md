@@ -3,6 +3,7 @@ LLM-chain with FastAPI and SmolLLM
 
 
 ## How to install:
+Open up git bash and navigate to the folder for where you clone to git to and then do the following:
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate        # mac: .venv/bin/activate 
@@ -36,3 +37,5 @@ Due to limitations of the LLM used the program has been designed to only answer 
 Where X is the information you want to find, such as age, salary, height, etc.
 
 Asking anything outside of these question can lead to weird results.
+
+Note: Sometimes the LLM will only return the answer and not a generated line of text to go along with it. Seems like this happens at random and only way to fix this is to restart the program.

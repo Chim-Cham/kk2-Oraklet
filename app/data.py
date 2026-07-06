@@ -53,14 +53,6 @@ def count_columns(df):
     result = len(df.columns)
     return result
 
-def max_number(df):
-    result = df.max()
-    return result
-
-def min_number(df):
-    result = df.min()
-    return result
-
 def average_number(df):
     result = df.mean()
     return result

@@ -1,7 +1,8 @@
 from transformers import pipeline
 from .runnable import Runnable
+import re
 from app.schemas import DatasetQuestion, DatasetContext
-from app.data import max_row, min_row, max_number, min_number, average_number, count_rows, count_columns, find_identifier
+from app.data import max_row, min_row, average_number, count_rows, count_columns, find_identifier
 
 pipe = pipeline(
     "text-generation",
@@ -94,6 +95,8 @@ class PromptBuilder(Runnable[DatasetContext, str]):
     def invoke(self, data: DatasetContext):
         
         return f"""
+            You're a helpful assistant.
+
             Rewrite this fact as one short sentence trying to answer the question.
 
             Do not take information from anywhere outside of this prompt.
@@ -117,8 +120,8 @@ class LLMRunner(Runnable[str, dict]):
 
         result = pipe(
             prompt,
-            max_new_tokens=50,
-            do_sample=False,
+            max_new_tokens=200,
+            temperature=0.1,
             return_full_text=False
         )
 
@@ -135,7 +138,8 @@ class ResponeParser(Runnable[str, dict]):
         answer = data["response"].strip()
 
         answer = answer.split("\n")[0].strip()
-        answer = answer.strip("1. ")
+        """ answer = answer.strip("1. ") """
+        answer = re.sub(r"^\d+\.\s*", "", answer)
 
         question = (
             data["prompt"].split("Question:")[-1].split("Sentence:")[0].strip()
