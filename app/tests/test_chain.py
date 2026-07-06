@@ -4,6 +4,21 @@ from app.schemas import DatasetQuestion, DatasetContext
 from app.chain.pipeline import chain
 from unittest.mock import patch
 
+def test_ContextBuilder():
+    df = pd.DataFrame({
+        "name": ["Alice", "Bob", "Carol"],
+        "grade": [85, 91, 97]
+    })
+
+    data = DatasetQuestion(
+        df=df,
+        question="Who has the highest grade?"
+    )
+
+    result = ContextBuilder().invoke(data)
+    assert "Carol" in result.context
+    assert "97" in result.context
+
 def test_prompt_builder():
     df = pd.DataFrame({
         "Name": ["Gustav", "Kajsa"],
@@ -43,7 +58,7 @@ def test_response_parser():
         Who?
         Sentence:
         """,
-        "response": "1. Thomas",
+        "response": "Thomas",
         "model": "MockLLM"
     }
 

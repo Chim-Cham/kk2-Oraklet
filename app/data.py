@@ -64,3 +64,9 @@ def min_number(df):
 def average_number(df):
     result = df.mean()
     return result
+
+def find_identifier(df):
+    for col in df.columns:
+        if df[col].dtype == "object":
+            return col
+    return None

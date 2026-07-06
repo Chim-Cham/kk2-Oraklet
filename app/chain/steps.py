@@ -1,7 +1,7 @@
 from transformers import pipeline
 from .runnable import Runnable
 from app.schemas import DatasetQuestion, DatasetContext
-from app.data import max_number, min_number, average_number, count_rows, count_columns
+from app.data import max_row, min_row, max_number, min_number, average_number, count_rows, count_columns, find_identifier
 
 pipe = pipeline(
     "text-generation",
@@ -63,18 +63,39 @@ class ContextBuilder(Runnable[DatasetQuestion, DatasetContext]):
 
             for col in df.select_dtypes(include="number").columns:
                 
-                column = df[col]
-                
                 if col.lower() in question:
                     if operation == "max":
-                        value = max_number(column)
-                    elif operation == "min":
-                        value = min_number(column)
-                    elif operation == "average":
-                        value = average_number(column)
-                    
-                    context = f"{keyword.title()} {col}: {value}"
+                        
+                        row = max_row(df, col)
+                        identifier = find_identifier(df)
 
+                        if identifier:
+                            context = (
+                                f"{identifier}: {row[identifier]}\n"
+                                f"{col}: {row[col]}"
+                            )
+                        else:
+                            context = row.to_string()
+                            
+                    elif operation == "min":
+                        
+                        row = min_row(df, col)
+                        identifier = find_identifier(df)
+
+                        if identifier:
+                            context = (
+                                f"{identifier}: {row[identifier]}\n"
+                                f"{col}: {row[col]}"
+                            )
+                        else:
+                            context = row.to_string()
+
+                    elif operation == "average":
+                        value = average_number(df[col])
+                        context = f"{keyword.title()} {df[col]}: {value}"
+
+                    
+                    print(context)
                     break
                     
 
@@ -132,8 +153,8 @@ class ResponeParser(Runnable[str, dict]):
         answer = data["response"].strip()
 
         answer = answer.split("\n")[0].strip()
-        answer = answer.split(" ")
-        
+        answer = answer.strip("1. ")
+
         question = (
             data["prompt"].split("Question:")[-1].split("Sentence:")[0].strip()
         )
